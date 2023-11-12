@@ -65,7 +65,7 @@ async def unique_user_name_id(user_id: int, user_name: str):
     
 
 
-@router.websocket("/ws/private/{recipient_id}")
+@router.websocket("/private/{recipient_id}")
 async def web_private_endpoint(
     websocket: WebSocket,
     recipient_id: int,
