@@ -23,6 +23,7 @@ class SocketModel(BaseModel):
     message: str
     user_name: str
     avatar: str
+    is_read: bool
     
     class Config:
         from_attributes = True

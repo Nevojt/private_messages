@@ -6,7 +6,7 @@ from app.database import get_async_session
 from app import models, oauth2
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, asc, or_
+from sqlalchemy import and_, asc, or_, update
 from typing import List
 
 router = APIRouter()
@@ -50,6 +50,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
             "messages": private.messages,
             "user_name": user.user_name,
             "avatar": user.avatar,
+            "is_read": private.is_read,
         }
         for private, user in raw_messages
     ]
@@ -62,28 +63,22 @@ async def unique_user_name_id(user_id: int, user_name: str):
 
     
     return unique_user_name_id
-    
 
-async def check_unread_messages(session: AsyncSession, user_id: int) -> bool:
+async def mark_messages_as_read(session: AsyncSession, user_id: int):
     """
-    Перевіряє, чи є у користувача непрочитані повідомлення.
+    Оновлює статус непрочитаних повідомлень для користувача на 'прочитані'.
 
     Args:
         session (AsyncSession): Сесія бази даних.
         user_id (int): ID користувача.
-
-    Returns:
-        bool: True, якщо є непрочитані повідомлення, інакше False.
     """
-    query = select(models.PrivateMessage).where(
-        models.PrivateMessage.recipient_id == user_id,
-        models.PrivateMessage.is_read == False
+    await session.execute(
+        update(models.PrivateMessage)
+        .where(models.PrivateMessage.recipient_id == user_id, models.PrivateMessage.is_read == True)
+        .values(is_read=False)
     )
-    result = await session.execute(query)
-    return result.scalar() is not None
-
-
-
+    await session.commit()
+    
 
 @router.websocket("/private/{recipient_id}")
 async def web_private_endpoint(
@@ -114,8 +109,11 @@ async def web_private_endpoint(
     user = await oauth2.get_current_user(token, session)
    
     await manager.connect(websocket, user.id, recipient_id)
+    await mark_messages_as_read(session, recipient_id)
     messages = await fetch_last_private_messages(session, user.id, recipient_id)
 
+    
+    
     for message in messages:  
         message_json = json.dumps(message, ensure_ascii=False)
         await websocket.send_text(message_json)
@@ -127,7 +125,9 @@ async def web_private_endpoint(
                                                sender_id=user.id,
                                                recipient_id=recipient_id,
                                                user_name=user.user_name,
-                                               avatar=user.avatar
+                                               avatar=user.avatar,
+                                               is_read=True
+                                               
                                                )
     except WebSocketDisconnect:
         manager.disconnect(user.id, recipient_id)
