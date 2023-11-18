@@ -47,7 +47,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
         {
             "created_at": private.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "sender_id": private.sender_id,
-            "message": private.messages,
+            "messages": private.messages,
             "user_name": user.user_name,
             "avatar": user.avatar,
         }
@@ -63,6 +63,26 @@ async def unique_user_name_id(user_id: int, user_name: str):
     
     return unique_user_name_id
     
+
+async def check_unread_messages(session: AsyncSession, user_id: int) -> bool:
+    """
+    Перевіряє, чи є у користувача непрочитані повідомлення.
+
+    Args:
+        session (AsyncSession): Сесія бази даних.
+        user_id (int): ID користувача.
+
+    Returns:
+        bool: True, якщо є непрочитані повідомлення, інакше False.
+    """
+    query = select(models.PrivateMessage).where(
+        models.PrivateMessage.recipient_id == user_id,
+        models.PrivateMessage.is_read == False
+    )
+    result = await session.execute(query)
+    return result.scalar() is not None
+
+
 
 
 @router.websocket("/private/{recipient_id}")
