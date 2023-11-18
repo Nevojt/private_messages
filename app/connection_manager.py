@@ -32,7 +32,7 @@ class ConnectionManagerPrivate:
         message_data = {
             "created_at": current_time,
             "sender_id": sender_id,
-            "message": message,
+            "messages": message,
             "user_name": user_name,
             "avatar": avatar,
             "is_read": is_read
