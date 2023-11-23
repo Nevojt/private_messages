@@ -58,3 +58,4 @@ class ConnectionManagerPrivate:
             stmt = insert(models.PrivateMessage).values(messages=message, sender_id=sender_id, recipient_id=recipient_id)
             await session.execute(stmt)
             await session.commit()
+            # commit the changes to the database
