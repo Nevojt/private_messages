@@ -47,7 +47,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
         {
             "created_at": private.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "sender_id": private.sender_id,
-            "messages": private.messages,
+            "message": private.messages,
             "user_name": user.user_name,
             "avatar": user.avatar,
             "is_read": private.is_read,
@@ -121,7 +121,7 @@ async def web_private_endpoint(
     try:
         while True:
             data = await websocket.receive_json()
-            await manager.send_private_message(data['messages'],
+            await manager.send_private_message(data['message'],
                                                sender_id=user.id,
                                                recipient_id=recipient_id,
                                                user_name=user.user_name,
