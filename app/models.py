@@ -13,7 +13,8 @@ class PrivateMessage(Base):
     messages = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     is_read = Column(Boolean, nullable=False, default=True)
-  
+    
+    
 
 
 class User(Base):

@@ -59,3 +59,14 @@ class ConnectionManagerPrivate:
             await session.execute(stmt)
             await session.commit()
             # commit the changes to the database
+            
+class ConnectionManagerNotification:
+    def __init__(self):
+        self.active_connections: Dict[Tuple[int], WebSocket] = {}
+
+    async def connect(self, websocket: WebSocket, user_id: int):
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+
+    def disconnect(self, user_id: int):
+        self.active_connections.pop(user_id, None)
