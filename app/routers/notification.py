@@ -4,7 +4,6 @@ from app.database import get_async_session
 from app import models, oauth2
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 import asyncio
 
 router = APIRouter()
@@ -26,9 +25,13 @@ async def check_new_messages(session: AsyncSession, user_id: int):
         select(models.PrivateMessage)
         .where(models.PrivateMessage.recipient_id == user_id, models.PrivateMessage.is_read == True)
     )
-    return new_messages.scalars().all()
+    messages = new_messages.scalars().all()
+    # Отримання sender_id для кожного повідомлення
+    messages_info = [{"sender_id": message.sender_id, "message_id": message.id} for message in messages]
+    return messages_info
+    
 
-@router.websocket("/private/notification")
+@router.websocket("/notification")
 async def web_private_notification(
     websocket: WebSocket,
     token: str,
@@ -37,20 +40,27 @@ async def web_private_notification(
     # user = await oauth2.get_current_user(token, session)
     try:
         user = await oauth2.get_current_user(token, session)
-        print(user.id)
+
     except Exception as e:
-        print("Error getting user")
         await websocket.close(code=1008)  # Код закриття для політики
         return  # Припиняємо подальше виконання
+    
     await manager.connect(websocket, user.id)
 
     try:
         while True:
             # Перевіряємо нові повідомлення кожні N секунд
-            new_messages = await check_new_messages(session, user.id)
-            if new_messages:
-                await websocket.send_json({"type": "new_message", "data": "You have new messages"})
+            new_messages_info = await check_new_messages(session, user.id)
+            if new_messages_info:
+                # Відправляємо інформацію про кожне нове повідомлення
+                for message_info in new_messages_info:
+                    await websocket.send_json({
+                        "type": "new_message",
+                        "sender_id": message_info["sender_id"],
+                        "message_id": message_info["message_id"]
+                        
+                    })
             
-            await asyncio.sleep(1)  # N секунд чекання, можна налаштувати
+            await asyncio.sleep(5)  # N секунд чекання, можна налаштувати
     except WebSocketDisconnect:
         manager.disconnect(user.id)

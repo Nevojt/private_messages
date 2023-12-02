@@ -20,5 +20,5 @@ app.add_middleware(
 )
 
 
-# app.include_router(private_messages.router)
+app.include_router(private_messages.router)
 app.include_router(notification.router)

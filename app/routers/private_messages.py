@@ -58,11 +58,11 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     return messages
 
 
-async def unique_user_name_id(user_id: int, user_name: str):
-    unique_user_name_id = f"{user_id}-{user_name}"
+# async def unique_user_name_id(user_id: int, user_name: str):
+#     unique_user_name_id = f"{user_id}-{user_name}"
 
     
-    return unique_user_name_id
+#     return unique_user_name_id
 
 async def mark_messages_as_read(session: AsyncSession, user_id: int):
     """
@@ -109,7 +109,7 @@ async def web_private_endpoint(
     user = await oauth2.get_current_user(token, session)
    
     await manager.connect(websocket, user.id, recipient_id)
-    await mark_messages_as_read(session, recipient_id)
+    await mark_messages_as_read(session, user.id)
     messages = await fetch_last_private_messages(session, user.id, recipient_id)
 
     
