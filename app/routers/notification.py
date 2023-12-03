@@ -26,6 +26,7 @@ async def check_new_messages(session: AsyncSession, user_id: int):
         .where(models.PrivateMessage.recipient_id == user_id, models.PrivateMessage.is_read == True)
     )
     messages = new_messages.scalars().all()
+    
     # Отримання sender_id для кожного повідомлення
     messages_info = [{"sender_id": message.sender_id, "message_id": message.id} for message in messages]
     return messages_info

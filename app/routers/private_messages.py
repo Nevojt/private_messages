@@ -58,11 +58,11 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     return messages
 
 
-# async def unique_user_name_id(user_id: int, user_name: str):
-#     unique_user_name_id = f"{user_id}-{user_name}"
+async def unique_user_name_id(user_id: int, user_name: str):
+    unique_user_name_id = f"{user_id}-{user_name}"
 
     
-#     return unique_user_name_id
+    return unique_user_name_id
 
 async def mark_messages_as_read(session: AsyncSession, user_id: int):
     """
