@@ -2,19 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
-        
-        
 
-
-
-# class UserOut(BaseModel):
-#     id: int
-#     user_name: str
-#     avatar: str
-#     created_at: datetime
-    
-#     class Config:
-#         from_attributes = True
     
         
 class SocketModel(BaseModel):
@@ -29,6 +17,12 @@ class SocketModel(BaseModel):
         from_attributes = True
 
         
+
+    
+class TokenData(BaseModel):
+    id: Optional[int] = None
+    
+    
 # class UserCreate(BaseModel):
 #     email: EmailStr
 #     user_name: str
@@ -43,7 +37,17 @@ class SocketModel(BaseModel):
 # class Token(BaseModel):
 #     access_token: str
 #     token_type: str
+
+        
+        
+
+
+
+# class UserOut(BaseModel):
+#     id: int
+#     user_name: str
+#     avatar: str
+#     created_at: datetime
     
-class TokenData(BaseModel):
-    id: Optional[int] = None
-    
+#     class Config:
+#         from_attributes = True
