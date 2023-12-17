@@ -1,4 +1,5 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi.websockets import WebSocketState
 from app.connection_manager import ConnectionManagerNotification
 from app.database import get_async_session
 from app import models, oauth2
@@ -38,30 +39,34 @@ async def web_private_notification(
     token: str,
     session: AsyncSession = Depends(get_async_session)
 ):
-    # user = await oauth2.get_current_user(token, session)
     try:
         user = await oauth2.get_current_user(token, session)
-
     except Exception as e:
         await websocket.close(code=1008)  # Код закриття для політики
         return  # Припиняємо подальше виконання
-    
+
     await manager.connect(websocket, user.id)
 
     try:
         while True:
-            # Перевіряємо нові повідомлення кожні N секунд
+            # Перевіряємо статус WebSocket перед відправкою повідомлень
+            if websocket.client_state != WebSocketState.CONNECTED:
+                break  # Припиняємо цикл, якщо з'єднання не активне
+
             new_messages_info = await check_new_messages(session, user.id)
             if new_messages_info:
-                # Відправляємо інформацію про кожне нове повідомлення
                 for message_info in new_messages_info:
                     await websocket.send_json({
                         "type": "new_message",
                         "sender_id": message_info["sender_id"],
                         "message_id": message_info["message_id"]
-                        
                     })
-            
+
             await asyncio.sleep(5)  # N секунд чекання, можна налаштувати
     except WebSocketDisconnect:
         manager.disconnect(user.id)
+    except Exception as e:
+        # Логування помилки
+        print(f"Error in WebSocket: {e}")
+        await websocket.close(code=1011)  # Несподівана помилка
+
