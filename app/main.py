@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
-from .routers import private_messages, notification
+from .routers import private_messages
 from app import models
 
 models.Base.metadata.create_all(bind=engine)
@@ -21,4 +21,3 @@ app.add_middleware(
 
 
 app.include_router(private_messages.router)
-app.include_router(notification.router)
