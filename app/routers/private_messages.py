@@ -48,7 +48,7 @@ async def web_private_endpoint(
     user = await oauth2.get_current_user(token, session)
    
     await manager.connect(websocket, user.id, recipient_id)
-    await mark_messages_as_read(session, user.id)
+    await mark_messages_as_read(session, recipient_id)
     messages = await fetch_last_private_messages(session, user.id, recipient_id)
     messages.reverse()
     
