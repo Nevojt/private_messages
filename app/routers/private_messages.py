@@ -1,83 +1,22 @@
-
+import logging
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from app.connection_manager import ConnectionManagerPrivate
 from app.database import get_async_session
-from app import models, oauth2
-from sqlalchemy.future import select
+from app import oauth2, schemas
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, asc, or_, update
-from typing import List
+from .func_private import fetch_last_private_messages, mark_messages_as_read, process_vote
+
+# Налаштування логування
+logging.basicConfig(filename='log/private_message.log', format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-            
 manager = ConnectionManagerPrivate()
 
 
 
-async def fetch_last_private_messages(session: AsyncSession, sender_id: int, recipient_id: int) -> List[dict]:
-    
-    """
-    Fetch the last private messages between two users from the database.
 
-    Args:
-    session (AsyncSession): The database session to execute the query.
-    sender_id (int): The ID of the user who sent the message.
-    recipient_id (int): The ID of the user who received the message.
-
-    Returns:
-    List[dict]: A list of dictionaries containing message details.
-    """
-    
-    query = select(models.PrivateMessage, models.User).join(
-        models.User, models.PrivateMessage.sender_id == models.User.id
-    ).where(
-        or_(
-            and_(models.PrivateMessage.sender_id == sender_id, models.PrivateMessage.recipient_id == recipient_id),
-            and_(models.PrivateMessage.sender_id == recipient_id, models.PrivateMessage.recipient_id == sender_id)
-        )
-    ).order_by(asc(models.PrivateMessage.id))#.limit(5)
-
-    result = await session.execute(query)
-    raw_messages = result.all()
-
-    messages = [
-        {
-            "created_at": private.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "sender_id": private.sender_id,
-            "messages": private.messages,
-            "user_name": user.user_name,
-            "avatar": user.avatar,
-            "is_read": private.is_read,
-        }
-        for private, user in raw_messages
-    ]
-
-    return messages
-
-
-async def unique_user_name_id(user_id: int, user_name: str):
-    unique_user_name_id = f"{user_id}-{user_name}"
-
-    
-    return unique_user_name_id
-
-async def mark_messages_as_read(session: AsyncSession, user_id: int):
-    """
-    Оновлює статус непрочитаних повідомлень для користувача на 'прочитані'.
-
-    Args:
-        session (AsyncSession): Сесія бази даних.
-        user_id (int): ID користувача.
-    """
-    await session.execute(
-        update(models.PrivateMessage)
-        .where(models.PrivateMessage.recipient_id == user_id, models.PrivateMessage.is_read == True)
-        .values(is_read=False)
-    )
-    await session.commit()
     
 
 @router.websocket("/private/{recipient_id}")
@@ -111,7 +50,7 @@ async def web_private_endpoint(
     await manager.connect(websocket, user.id, recipient_id)
     await mark_messages_as_read(session, user.id)
     messages = await fetch_last_private_messages(session, user.id, recipient_id)
-
+    messages.reverse()
     
     
     for message in messages:  
@@ -121,16 +60,32 @@ async def web_private_endpoint(
     try:
         while True:
             data = await websocket.receive_json()
-            await manager.send_private_message(data['messages'],
-                                               sender_id=user.id,
-                                               recipient_id=recipient_id,
-                                               user_name=user.user_name,
-                                               avatar=user.avatar,
-                                               is_read=True
-                                               
-                                               )
+            if 'vote' in data:
+                try:
+                    vote_data = schemas.Vote(**data['vote'])
+                    await process_vote(vote_data, session, user)
+                 
+                    messages = await fetch_last_private_messages(session, user.id, recipient_id)
+                    
+                    await websocket.send_json({"message": "Vote posted "})
+                    messages_json = json.dumps(messages, ensure_ascii=False)
+                    await websocket.send_text(messages_json)
+                                
+
+                except Exception as e:
+                    logger.error(f"Error processing vote: {e}", exc_info=True)  # Запис помилки
+                    await websocket.send_json({"message": f"Error processing vote: {e}"})
+            else:
+                await manager.send_private_message(data['messages'],
+                                                sender_id=user.id,
+                                                recipient_id=recipient_id,
+                                                user_name=user.user_name,
+                                                verified=user.verified,
+                                                avatar=user.avatar,
+                                                is_read=True
+                                                
+                                                )
     except WebSocketDisconnect:
         manager.disconnect(user.id, recipient_id)
 
 
-# hello committer
