@@ -3,11 +3,8 @@ import logging
 from fastapi import HTTPException, status
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, asc, or_, update
 from typing import List
 from sqlalchemy import and_, asc, or_, update, func
-from typing import List
-from sqlalchemy.future import select
 from app import models, schemas
 
 
@@ -77,7 +74,7 @@ async def unique_user_name_id(user_id: int, user_name: str):
 
 
 
-async def mark_messages_as_read(session: AsyncSession, user_id: int):
+async def mark_messages_as_read(session: AsyncSession, user_id: int, sender_id: int):
     """
     Оновлює статус непрочитаних повідомлень для користувача на 'прочитані'.
 
@@ -87,7 +84,8 @@ async def mark_messages_as_read(session: AsyncSession, user_id: int):
     """
     await session.execute(
         update(models.PrivateMessage)
-        .where(models.PrivateMessage.recipient_id == user_id, models.PrivateMessage.is_read == True)
+        .where(models.PrivateMessage.recipient_id == user_id,
+               models.PrivateMessage.is_read == True).filter(models.PrivateMessage.sender_id == sender_id)
         .values(is_read=False)
     )
     await session.commit()
