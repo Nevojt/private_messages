@@ -20,7 +20,9 @@ class SocketModel(BaseModel):
     class Config:
         from_attributes = True
 
-        
+class SocketUpdate(BaseModel):
+    id: int
+    messages: str
 
     
 class TokenData(BaseModel):

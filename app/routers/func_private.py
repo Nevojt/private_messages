@@ -137,3 +137,23 @@ async def process_vote(vote: schemas.Vote, session: AsyncSession, current_user: 
         # Відправлення загального повідомлення про помилку
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="An unexpected error occurred")
+        
+        
+async def change_message(id_messages: int, message_update: schemas.SocketUpdate,
+                         session: AsyncSession, 
+                         current_user: models.User):
+    
+    
+    query = select(models.PrivateMessage).where(models.PrivateMessage.id == id_messages, models.PrivateMessage.sender_id == current_user.id)
+    result = await session.execute(query)
+    messages = result.scalar()
+
+    if messages is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found or you don't have permission to edit this message")
+
+    # Оновлення повідомлення
+    messages.messages = message_update.messages
+    session.add(messages)
+    await session.commit()
+
+    return {"message": "Message updated successfully"}
