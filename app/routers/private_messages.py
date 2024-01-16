@@ -5,7 +5,7 @@ from app.connection_manager import ConnectionManagerPrivate
 from app.database import get_async_session
 from app import oauth2, schemas
 from sqlalchemy.ext.asyncio import AsyncSession
-from .func_private import change_message, fetch_last_private_messages, mark_messages_as_read, process_vote
+from .func_private import change_message, delete_message, fetch_last_private_messages, mark_messages_as_read, process_vote
 
 # Налаштування логування
 logging.basicConfig(filename='log/private_message.log', format='%(asctime)s - %(levelname)s - %(message)s')
@@ -75,6 +75,23 @@ async def web_private_endpoint(
                 except Exception as e:
                     logger.error(f"Error processing vote: {e}", exc_info=True)  # Запис помилки
                     await websocket.send_json({"message": f"Error processing vote: {e}"})
+                
+            # Block delete message       
+            elif 'delete_message' in data:
+                try:
+                    message_data = schemas.SocketDelete(**data['delete_message'])
+                    await delete_message(message_data.id, session, user)
+                    
+                    messages = await fetch_last_private_messages(session, user.id, recipient_id)
+                    
+                    await websocket.send_json({"message": "Message deleted."})
+                    messages_json = json.dumps(messages, ensure_ascii=False)
+                    await websocket.send_text(messages_json)
+                
+                                
+                except Exception as e:
+                    logger.error(f"Error processing delete: {e}", exc_info=True)  # Запис помилки
+                    await websocket.send_json({"message": f"Error processing change: {e}"})
                     
             elif 'change_message' in data:
                 try:
