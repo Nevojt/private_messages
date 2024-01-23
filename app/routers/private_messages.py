@@ -52,7 +52,6 @@ async def web_private_endpoint(
     messages = await fetch_last_private_messages(session, user.id, recipient_id)
     messages.reverse()
     
-    
     for message in messages:  
         message_json = json.dumps(message, ensure_ascii=False)
         await websocket.send_text(message_json)
@@ -68,8 +67,11 @@ async def web_private_endpoint(
                     messages = await fetch_last_private_messages(session, user.id, recipient_id)
                     
                     await websocket.send_json({"message": "Vote posted "})
-                    messages_json = json.dumps(messages, ensure_ascii=False)
-                    await websocket.send_text(messages_json)
+                    messages.reverse()
+    
+                    for message in messages:  
+                        message_json = json.dumps(message, ensure_ascii=False)
+                        await websocket.send_text(message_json)
                                 
 
                 except Exception as e:
@@ -85,8 +87,11 @@ async def web_private_endpoint(
                     messages = await fetch_last_private_messages(session, user.id, recipient_id)
                     
                     await websocket.send_json({"message": "Message deleted."})
-                    messages_json = json.dumps(messages, ensure_ascii=False)
-                    await websocket.send_text(messages_json)
+                    messages.reverse()
+    
+                    for message in messages:  
+                        message_json = json.dumps(message, ensure_ascii=False)
+                        await websocket.send_text(message_json)
                 
                                 
                 except Exception as e:
@@ -101,8 +106,11 @@ async def web_private_endpoint(
                     messages = await fetch_last_private_messages(session, user.id, recipient_id)
                     
                     await websocket.send_json({"message": "Message updated "})
-                    messages_json = json.dumps(messages, ensure_ascii=False)
-                    await websocket.send_text(messages_json)
+                    messages.reverse()
+                        
+                    for message in messages:  
+                        message_json = json.dumps(message, ensure_ascii=False)
+                        await websocket.send_text(message_json)
                     
 
                 except Exception as e:
