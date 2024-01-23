@@ -50,12 +50,9 @@ async def web_private_endpoint(
     await manager.connect(websocket, user.id, recipient_id)
     await mark_messages_as_read(session, user.id, recipient_id)
     messages = await fetch_last_private_messages(session, user.id, recipient_id)
-    messages.reverse()
-    
-    
-    for message in messages:  
-        message_json = json.dumps(message, ensure_ascii=False)
-        await websocket.send_text(message_json)
+  
+    messages_json = json.dumps(messages, ensure_ascii=False)
+    await websocket.send_text(messages_json)
 
     try:
         while True:
