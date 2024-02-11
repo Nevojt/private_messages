@@ -1,7 +1,9 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, Field, EmailStr
+from typing_extensions import Annotated
+from pydantic import BaseModel
 from datetime import datetime
-from pydantic.types import conint
+
 
 
     
@@ -33,7 +35,7 @@ class TokenData(BaseModel):
     
 class Vote(BaseModel):
     message_id: int
-    dir: conint(le=1)
+    dir: Annotated[int, Field(strict=True, le=1)]
     
     
 # class UserCreate(BaseModel):
