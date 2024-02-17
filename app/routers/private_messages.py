@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .func_private import change_message, delete_message, fetch_last_private_messages, mark_messages_as_read, process_vote
 
 # Налаштування логування
-logging.basicConfig(filename='log/private_message.log', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='_log/private_message.log', format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 router = APIRouter()

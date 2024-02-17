@@ -9,7 +9,7 @@ from typing import Dict, Tuple
 
 
 # Налаштування логування
-logging.basicConfig(filename='log/connect_manager.log', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='_log/connect_manager.log', format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
