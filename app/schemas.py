@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 from pydantic import BaseModel
 from datetime import datetime
@@ -37,32 +37,3 @@ class Vote(BaseModel):
     message_id: int
     dir: Annotated[int, Field(strict=True, le=1)]
     
-    
-# class UserCreate(BaseModel):
-#     email: EmailStr
-#     user_name: str
-#     password: str
-#     avatar: str
-    
-        
-# class UserLogin(BaseModel):
-#     email: EmailStr
-#     password: str
-
-# class Token(BaseModel):
-#     access_token: str
-#     token_type: str
-
-        
-        
-
-
-
-# class UserOut(BaseModel):
-#     id: int
-#     user_name: str
-#     avatar: str
-#     created_at: datetime
-    
-#     class Config:
-#         from_attributes = True

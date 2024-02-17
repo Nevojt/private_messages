@@ -1,8 +1,13 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Enum
+from enum import Enum as PythonEnum
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from .database import Base
 
+
+class UserRole(str, PythonEnum):
+	user = "user"
+	admin = "admin"
 
 class PrivateMessage(Base):
     __tablename__ = 'private_messages'
@@ -27,6 +32,7 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     verified = Column(Boolean, nullable=False, server_default='false')
     refresh_token = Column(String, nullable=True)
+    role = Column(Enum(UserRole), default=UserRole.user)
     
 class PrivateMessageVote(Base):
     __tablename__ = 'private_message_votes'
