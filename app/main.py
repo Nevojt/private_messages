@@ -7,7 +7,12 @@ from app import models
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(
+    docs_url="/docs",
+    title="Private Messages API",
+    description="API for private messages",
+    version="0.1.0",
+)
 
 origins = ["*"]
 
