@@ -129,6 +129,6 @@ async def web_private_endpoint(
                                                 
                                                 )
     except WebSocketDisconnect:
-        manager.disconnect(user.id, recipient_id)
+        await manager.disconnect(user.id, recipient_id)
 
 

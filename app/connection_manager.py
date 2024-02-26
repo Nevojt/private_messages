@@ -24,7 +24,7 @@ class ConnectionManagerPrivate:
         await websocket.accept()
         self.active_connections[(user_id, recipient_id)] = websocket
 
-    def disconnect(self, user_id: int, recipient_id: int):
+    async def disconnect(self, user_id: int, recipient_id: int):
         self.active_connections.pop((user_id, recipient_id), None)
 
     async def send_private_message(self, message: str, sender_id: int, recipient_id: int,
