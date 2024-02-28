@@ -1,11 +1,13 @@
 import logging
 import json
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
 from app.connection_manager import ConnectionManagerPrivate
 from app.database import get_async_session
 from app import oauth2, schemas
 from sqlalchemy.ext.asyncio import AsyncSession
 from .func_private import change_message, delete_message, fetch_last_private_messages, mark_messages_as_read, process_vote
+from .func_private import get_recipient_by_id
+
 
 # Налаштування логування
 logging.basicConfig(filename='_log/private_message.log', format='%(asctime)s - %(levelname)s - %(message)s')
@@ -46,6 +48,10 @@ async def web_private_endpoint(
     
     
     user = await oauth2.get_current_user(token, session)
+    recipient = await get_recipient_by_id(session, recipient_id)
+    if not recipient:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Recipient not found.")
    
     await manager.connect(websocket, user.id, recipient_id)
     await mark_messages_as_read(session, user.id, recipient_id)

@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import pytz
 import logging
 from fastapi import WebSocket
 from app.database import async_session_maker
@@ -34,14 +35,15 @@ class ConnectionManagerPrivate:
         sender_to_recipient = (sender_id, recipient_id)
         recipient_to_sender = (recipient_id, sender_id)
         
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timezone = pytz.timezone('UTC')
+        current_time_utc = datetime.now(timezone).isoformat()
         message_id = None
         vote_count = 0
         
         message_id = await self.add_private_message_to_database(message, sender_id, recipient_id)
         
         message_data = {
-            "created_at": current_time,
+            "created_at": current_time_utc,
             "sender_id": sender_id,
             "id": message_id,
             "messages": message,

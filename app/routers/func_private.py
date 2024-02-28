@@ -66,6 +66,15 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     return messages
 
 
+
+
+async def get_recipient_by_id(session: AsyncSession, recipient_id: id):
+    recipient = await session.execute(select(models.User).filter(models.User.id == recipient_id))
+    result = recipient.scalars().first()
+    
+    return result   
+
+
 async def unique_user_name_id(user_id: int, user_name: str):
     unique_user_name_id = f"{user_id}-{user_name}"
 
