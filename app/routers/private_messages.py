@@ -136,5 +136,8 @@ async def web_private_endpoint(
                                                 )
     except WebSocketDisconnect:
         await manager.disconnect(user.id, recipient_id)
+    finally:
+        await session.close()
+        print("Session closed")
 
 
