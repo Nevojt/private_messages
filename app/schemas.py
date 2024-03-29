@@ -11,7 +11,8 @@ from datetime import datetime
 class SocketModel(BaseModel):
     created_at: datetime
     receiver_id: int
-    message: str
+    message: Optional[int] = None
+    fileUrl: Optional[int] = None
     id: int
     user_name: str
     verified: bool

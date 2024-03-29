@@ -123,6 +123,15 @@ async def web_private_endpoint(
                 except Exception as e:
                     logger.error(f"Error processing vote: {e}", exc_info=True)  # Запис помилки
                     await websocket.send_json({"message": f"Error processing change: {e}"})
+            elif 'fileUrl' in data:
+                await manager.send_private_file(data['fileUrl'],
+                                                sender_id=user.id,
+                                                recipient_id=recipient_id,
+                                                user_name=user.user_name,
+                                                verified=user.verified,
+                                                avatar=user.avatar,
+                                                is_read=True
+                                                )
                     
             else:
                 await manager.send_private_message(data['messages'],

@@ -54,6 +54,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
             "sender_id": private.sender_id,
             "id": private.id,
             "messages": private.messages,
+            "fileUrl": private.fileUrl,
             "user_name": user.user_name,
             "verified": user.verified,
             "avatar": user.avatar,
