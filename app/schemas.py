@@ -10,15 +10,17 @@ from datetime import datetime
         
 class SocketModel(BaseModel):
     created_at: datetime
-    receiver_id: int
-    message: Optional[int] = None
-    fileUrl: Optional[int] = None
+    recipient_id: int
+    message: Optional[str] = None
+    fileUrl: Optional[str] = None
+    id_return: Optional[int] = None
     id: int
     user_name: str
     verified: bool
     avatar: str
     is_read: bool
     dir: int
+    edited: bool
     
     class Config:
         from_attributes = True

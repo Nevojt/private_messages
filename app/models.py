@@ -19,6 +19,8 @@ class PrivateMessage(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     is_read = Column(Boolean, nullable=False, default=True)
     fileUrl = Column(String)
+    edited = Column(Boolean, server_default='false')
+    id_return = Column(Integer)
     
     
 class User(Base):

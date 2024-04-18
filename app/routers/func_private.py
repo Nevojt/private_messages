@@ -55,11 +55,13 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
             "id": private.id,
             "messages": private.messages,
             "fileUrl": private.fileUrl,
+            "id_return": private.id_return,
             "user_name": user.user_name,
             "verified": user.verified,
             "avatar": user.avatar,
             "is_read": private.is_read,
             "vote": votes,
+            "edited": private.edited
         }
         for private, user, votes in raw_messages
     ]

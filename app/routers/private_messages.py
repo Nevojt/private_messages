@@ -132,7 +132,25 @@ async def web_private_endpoint(
                                                 avatar=user.avatar,
                                                 is_read=True
                                                 )
-                    
+                
+            elif 'send' in data:
+                message_data = data['send']
+                original_message_id = message_data['original_message_id']
+                original_message = message_data['messages']
+                file_url = message_data['fileUrl']
+                
+                await manager.send_private_all(
+                                                message=original_message,
+                                                file=file_url,
+                                                sender_id=user.id,
+                                                recipient_id=recipient_id,
+                                                user_name=user.user_name,
+                                                verified=user.verified,
+                                                avatar=user.avatar,
+                                                id_return=original_message_id,
+                                                is_read=True
+                                            )
+                      
             else:
                 await manager.send_private_message(data['messages'],
                                                 sender_id=user.id,
