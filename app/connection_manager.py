@@ -125,10 +125,10 @@ class ConnectionManagerPrivate:
         
         
     async def send_private_all(self, message: Optional[str], file: Optional[str],
-                               id_return: Optional[int],
                                sender_id: int, recipient_id: int,
-                                user_name: str, verified: bool,
-                                avatar: str, is_read: bool):
+                               user_name: str, verified: bool,
+                               avatar: str, id_return: Optional[int],
+                               is_read: bool):
         
         sender_to_recipient = (sender_id, recipient_id)
         recipient_to_sender = (recipient_id, sender_id)
@@ -138,7 +138,7 @@ class ConnectionManagerPrivate:
         message_id = None
         vote_count = 0
         
-        message_id = await self.add_private_all_to_database(sender_id, recipient_id, message, is_read, file, id_return)
+        message_id = await self.add_private_all_to_database(sender_id, recipient_id, message, file, id_return, is_read)
         
         message_data = {
             "created_at": current_time_utc,
@@ -166,8 +166,9 @@ class ConnectionManagerPrivate:
     
 
     @staticmethod
-    async def add_private_all_to_database(messages: Optional[str], file: Optional[str],is_read: bool,
-                                          id_return: Optional[int], sender_id: int, recipient_id: int):
+    async def add_private_all_to_database(sender_id: int, recipient_id: int,
+                                          messages: Optional[str], file: Optional[str],
+                                          id_return: Optional[int], is_read: bool):
         async with async_session_maker() as session:
             stmt = insert(models.PrivateMessage).values(sender_id=sender_id, recipient_id=recipient_id,messages=messages,
                                                         is_read=is_read, fileUrl=file, id_return=id_return
