@@ -20,5 +20,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/hello")
+def hello():
+    return {"message": "Hello World"}
 
 app.include_router(private_messages.router)
