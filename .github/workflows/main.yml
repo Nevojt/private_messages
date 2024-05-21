@@ -35,6 +35,6 @@ jobs:
         sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
         eval \$(ssh-agent -s) && \
         ssh-add ~/.ssh/git_conect_key && \
-        cd /home/dmytro/private && \
+        cd /home/$SSH_USER/private && \
         git pull origin master && \
         echo $SSH_PASSWORD | sudo -S systemctl restart private.service"
