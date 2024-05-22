@@ -51,7 +51,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     messages = [
         {
             "created_at": private.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "sender_id": private.sender_id,
+            "receiver_id": private.sender_id,
             "id": private.id,
             "messages": private.messages,
             "fileUrl": private.fileUrl,

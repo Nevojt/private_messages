@@ -136,7 +136,7 @@ async def web_private_endpoint(
             elif 'send' in data:
                 message_data = data['send']
                 original_message_id = message_data['original_message_id']
-                original_message = message_data['messages']
+                original_message = message_data['message']
                 file_url = message_data['fileUrl']
                 
                 await manager.send_private_all(
@@ -153,7 +153,7 @@ async def web_private_endpoint(
                                             
                       
             else:
-                await manager.send_private_message(data['messages'],
+                await manager.send_private_message(data['message'],
                                                 sender_id=user.id,
                                                 recipient_id=recipient_id,
                                                 user_name=user.user_name,
