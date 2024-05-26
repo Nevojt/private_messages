@@ -48,6 +48,10 @@ async def web_private_endpoint(
     
     
     user = await oauth2.get_current_user(token, session)
+    
+    if user.blocked:
+        await websocket.close(code=1008)
+        return
     recipient = await get_recipient_by_id(session, recipient_id)
     if not recipient:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
