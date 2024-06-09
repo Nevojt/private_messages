@@ -45,9 +45,9 @@ class ConnectionManagerPrivate:
 
         # Створення екземпляра SocketModel
         socket_message = schemas.SocketModel(
-            id=message_id,
             created_at=current_time_utc,
-            receiver_id=receiver_id,  # Змінено на receiver_id
+            id=message_id,
+            receiver_id=receiver_id,
             message=message,
             fileUrl=file,
             id_return=id_return,
@@ -55,7 +55,7 @@ class ConnectionManagerPrivate:
             verified=verified,
             avatar=avatar,
             is_read=is_read,
-            vote=0,  # Припускаємо, що початкове голосування 0
+            vote=0,
             edited=False
         )
 

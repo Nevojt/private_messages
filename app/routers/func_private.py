@@ -85,8 +85,8 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
             decrypted_message = "Decryption failed"
 
         message_data = {
-            "id": private.id,
             "created_at": private.created_at,
+            "id": private.id,
             "receiver_id": private.sender_id,
             "message": decrypted_message,
             "fileUrl": private.fileUrl,
