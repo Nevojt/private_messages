@@ -10,7 +10,7 @@ from datetime import datetime
         
 class SocketModel(BaseModel):
     created_at: datetime
-    recipient_id: int
+    receiver_id: int
     message: Optional[str] = None
     fileUrl: Optional[str] = None
     id_return: Optional[int] = None
@@ -19,7 +19,7 @@ class SocketModel(BaseModel):
     verified: bool
     avatar: str
     is_read: bool
-    dir: int
+    vote: int
     edited: bool
     
     class Config:

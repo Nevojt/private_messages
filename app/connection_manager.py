@@ -31,20 +31,20 @@ class ConnectionManagerPrivate:
 
         
     async def send_private_all(self, message: Optional[str], file: Optional[str],
-                               sender_id: int, recipient_id: int,
+                               sender_id: int, receiver_id: int,
                                user_name: str, verified: bool,
                                avatar: str, id_return: Optional[int],
                                is_read: bool):
         
-        sender_to_recipient = (sender_id, recipient_id)
-        recipient_to_sender = (recipient_id, sender_id)
+        sender_to_recipient = (sender_id, receiver_id)
+        recipient_to_sender = (receiver_id, sender_id)
         
         timezone = pytz.timezone('UTC')
         current_time_utc = datetime.now(timezone).isoformat()
         message_id = None
         vote_count = 0
         
-        message_id = await self.add_private_all_to_database(sender_id, recipient_id, message, file, id_return, is_read)
+        message_id = await self.add_private_all_to_database(sender_id, receiver_id, message, file, id_return, is_read)
         
         message_data = {
             "created_at": current_time_utc,
@@ -72,12 +72,12 @@ class ConnectionManagerPrivate:
     
 
     @staticmethod
-    async def add_private_all_to_database(sender_id: int, recipient_id: int,
+    async def add_private_all_to_database(sender_id: int, receiver_id: int,
                                           message: Optional[str], file: Optional[str],
                                           id_return: Optional[int], is_read: bool):
         encrypt_message = await async_encrypt(message)
         async with async_session_maker() as session:
-            stmt = insert(models.PrivateMessage).values(sender_id=sender_id, recipient_id=recipient_id,messages=encrypt_message,
+            stmt = insert(models.PrivateMessage).values(sender_id=sender_id, receiver_id=receiver_id,message=encrypt_message,
                                                         is_read=is_read, fileUrl=file, id_return=id_return
                                                         )
             result = await session.execute(stmt)

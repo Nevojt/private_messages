@@ -21,10 +21,10 @@ manager = ConnectionManagerPrivate()
 
     
 
-@router.websocket("/private/{recipient_id}")
+@router.websocket("/private/{receiver_id}")
 async def web_private_endpoint(
     websocket: WebSocket,
-    recipient_id: int,
+    receiver_id: int,
     token: str,
     session: AsyncSession = Depends(get_async_session)
 ):
@@ -48,14 +48,14 @@ async def web_private_endpoint(
     
     
     user = await oauth2.get_current_user(token, session)
-    recipient = await get_recipient_by_id(session, recipient_id)
+    recipient = await get_recipient_by_id(session, receiver_id)
     if not recipient:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Recipient not found.")
    
-    await manager.connect(websocket, user.id, recipient_id)
-    await mark_messages_as_read(session, user.id, recipient_id)
-    messages = await fetch_last_private_messages(session, user.id, recipient_id)
+    await manager.connect(websocket, user.id, receiver_id)
+    await mark_messages_as_read(session, user.id, receiver_id)
+    messages = await fetch_last_private_messages(session, user.id, receiver_id)
     messages.reverse()
     
     
@@ -71,7 +71,7 @@ async def web_private_endpoint(
                     vote_data = schemas.Vote(**data['vote'])
                     await process_vote(vote_data, session, user)
                  
-                    messages = await fetch_last_private_messages(session, user.id, recipient_id)
+                    messages = await fetch_last_private_messages(session, user.id, receiver_id)
                     
                     await websocket.send_json({"message": "Vote posted "})
                     messages.reverse()
@@ -91,7 +91,7 @@ async def web_private_endpoint(
                     message_data = schemas.SocketDelete(**data['delete_message'])
                     await delete_message(message_data.id, session, user)
                     
-                    messages = await fetch_last_private_messages(session, user.id, recipient_id)
+                    messages = await fetch_last_private_messages(session, user.id, receiver_id)
                     
                     await websocket.send_json({"message": "Message deleted."})
                     messages.reverse()
@@ -110,7 +110,7 @@ async def web_private_endpoint(
                     message_data = schemas.SocketUpdate(**data['change_message'])
                     await change_message(message_data.id, message_data, session, user)
                     
-                    messages = await fetch_last_private_messages(session, user.id, recipient_id)
+                    messages = await fetch_last_private_messages(session, user.id, receiver_id)
                     
                     await websocket.send_json({"message": "Message updated "})
                     messages.reverse()
@@ -123,15 +123,7 @@ async def web_private_endpoint(
                 except Exception as e:
                     logger.error(f"Error processing vote: {e}", exc_info=True)  # Запис помилки
                     await websocket.send_json({"message": f"Error processing change: {e}"})
-            elif 'fileUrl' in data:
-                await manager.send_private_file(data['fileUrl'],
-                                                sender_id=user.id,
-                                                recipient_id=recipient_id,
-                                                user_name=user.user_name,
-                                                verified=user.verified,
-                                                avatar=user.avatar,
-                                                is_read=True
-                                                )
+
                 
             elif 'send' in data:
                 message_data = data['send']
@@ -142,7 +134,7 @@ async def web_private_endpoint(
                 await manager.send_private_all(
                                     message=original_message,
                                     file=file_url,
-                                    recipient_id=recipient_id,
+                                    receiver_id=receiver_id,
                                     sender_id=user.id,
                                     user_name=user.user_name,
                                     avatar=user.avatar,
@@ -151,19 +143,8 @@ async def web_private_endpoint(
                                     is_read=True
                                     )
                                             
-                      
-            else:
-                await manager.send_private_message(data['message'],
-                                                sender_id=user.id,
-                                                recipient_id=recipient_id,
-                                                user_name=user.user_name,
-                                                verified=user.verified,
-                                                avatar=user.avatar,
-                                                is_read=True
-                                                
-                                                )
     except WebSocketDisconnect:
-        await manager.disconnect(user.id, recipient_id)
+        await manager.disconnect(user.id, receiver_id)
     finally:
         await session.close()
         print("Session closed")

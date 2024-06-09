@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 
-async def fetch_last_private_messages(session: AsyncSession, sender_id: int, recipient_id: int) -> List[dict]:
+async def fetch_last_private_messages(session: AsyncSession, sender_id: int, receiver_id: int) -> List[dict]:
     
     """
     Fetch the last private messages between two users from the database.
@@ -51,7 +51,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     Args:
     session (AsyncSession): The database session to execute the query.
     sender_id (int): The ID of the user who sent the message.
-    recipient_id (int): The ID of the user who received the message.
+    receiver_id (int): The ID of the user who received the message.
 
     Returns:
     List[dict]: A list of dictionaries containing message details.
@@ -67,8 +67,8 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
         models.PrivateMessageVote, models.PrivateMessage.id == models.PrivateMessageVote.message_id
     ).where(
         or_(
-            and_(models.PrivateMessage.sender_id == sender_id, models.PrivateMessage.recipient_id == recipient_id),
-            and_(models.PrivateMessage.sender_id == recipient_id, models.PrivateMessage.recipient_id == sender_id)
+            and_(models.PrivateMessage.sender_id == sender_id, models.PrivateMessage.receiver_id == receiver_id),
+            and_(models.PrivateMessage.sender_id == receiver_id, models.PrivateMessage.receiver_id == sender_id)
             )
     ).group_by(
         models.PrivateMessage.id, models.User.id
@@ -77,12 +77,17 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     result = await session.execute(query)
     raw_messages = result.all()
 
-    messages = [
-        {
+    messages = []
+    for private, user, votes in raw_messages:
+        decrypted_message = await async_decrypt(private.message)
+        if decrypted_message is None:
+            decrypted_message = "Decryption failed"  
+
+        messages.append({
             "created_at": private.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "receiver_id": private.sender_id,
             "id": private.id,
-            "messages": private.messages,
+            "message": decrypted_message, 
             "fileUrl": private.fileUrl,
             "id_return": private.id_return,
             "user_name": user.user_name,
@@ -91,17 +96,15 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
             "is_read": private.is_read,
             "vote": votes,
             "edited": private.edited
-        }
-        for private, user, votes in raw_messages
-    ]
+        })
     messages.reverse()
     return messages
 
 
 
 
-async def get_recipient_by_id(session: AsyncSession, recipient_id: id):
-    recipient = await session.execute(select(models.User).filter(models.User.id == recipient_id))
+async def get_recipient_by_id(session: AsyncSession, receiver_id: id):
+    recipient = await session.execute(select(models.User).filter(models.User.id == receiver_id))
     result = recipient.scalars().first()
     
     return result   
@@ -132,7 +135,7 @@ async def mark_messages_as_read(session: AsyncSession, user_id: int, sender_id: 
     """
     await session.execute(
         update(models.PrivateMessage)
-        .where(models.PrivateMessage.recipient_id == user_id,
+        .where(models.PrivateMessage.receiver_id == user_id,
                models.PrivateMessage.is_read == True).filter(models.PrivateMessage.sender_id == sender_id)
         .values(is_read=False)
     )
