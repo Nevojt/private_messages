@@ -47,7 +47,7 @@ class ConnectionManagerPrivate:
         socket_message = schemas.SocketModel(
             created_at=current_time_utc,
             id=message_id,
-            receiver_id=receiver_id,
+            sender_id=receiver_id,
             message=message,
             fileUrl=file,
             id_return=id_return,
@@ -62,9 +62,6 @@ class ConnectionManagerPrivate:
         # Серіалізація даних моделі у JSON
         message_json = socket_message.model_dump_json()
 
-        # Відправка повідомлення активним підключенням
-        sender_to_recipient = (sender_id, receiver_id)
-        recipient_to_sender = (receiver_id, sender_id)
 
         if sender_to_recipient in self.active_connections:
             await self.active_connections[sender_to_recipient].send_text(message_json)
