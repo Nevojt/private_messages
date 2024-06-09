@@ -27,7 +27,7 @@ class SocketModel(BaseModel):
 
 class SocketUpdate(BaseModel):
     id: int
-    messages: str
+    message: str
     
 class SocketDelete(BaseModel):
     id: int
