@@ -1,6 +1,7 @@
 
 import logging
 from fastapi import HTTPException, status
+from pydantic import ValidationError
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
@@ -81,13 +82,13 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     for private, user, votes in raw_messages:
         decrypted_message = await async_decrypt(private.message)
         if decrypted_message is None:
-            decrypted_message = "Decryption failed"  
+            decrypted_message = "Decryption failed"
 
-        messages.append({
-            "created_at": private.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "receiver_id": private.sender_id,
+        message_data = {
             "id": private.id,
-            "message": decrypted_message, 
+            "created_at": private.created_at,
+            "receiver_id": private.sender_id,
+            "message": decrypted_message,
             "fileUrl": private.fileUrl,
             "id_return": private.id_return,
             "user_name": user.user_name,
@@ -96,8 +97,13 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
             "is_read": private.is_read,
             "vote": votes,
             "edited": private.edited
-        })
-    messages.reverse()
+        }
+        try:
+            messages.append(schemas.SocketModel(**message_data))
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=f"Data validation error: {str(e)}")
+            
+    messages.reverse()  # Optionally reverse the list if needed
     return messages
 
 

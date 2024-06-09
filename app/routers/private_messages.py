@@ -60,7 +60,7 @@ async def web_private_endpoint(
     
     
     for message in messages:  
-        message_json = json.dumps(message, ensure_ascii=False)
+        message_json = message.json()
         await websocket.send_text(message_json)
 
     try:

@@ -4,7 +4,7 @@ import pytz
 import logging
 from fastapi import WebSocket
 from app.database import async_session_maker
-from app import models
+from app import models, schemas
 from sqlalchemy import insert
 from typing import Dict, Optional, Tuple
 from app.routers.func_private import async_encrypt
@@ -41,28 +41,31 @@ class ConnectionManagerPrivate:
         
         timezone = pytz.timezone('UTC')
         current_time_utc = datetime.now(timezone).isoformat()
-        message_id = None
-        vote_count = 0
-        
         message_id = await self.add_private_all_to_database(sender_id, receiver_id, message, file, id_return, is_read)
-        
-        message_data = {
-            "created_at": current_time_utc,
-            "receiver_id": sender_id,
-            "id": message_id,
-            "message": message if message is not None else None,
-            "fileUrl": file if file is not None else None,
-            "user_name": user_name,
-            "verified": verified,
-            "avatar": avatar,
-            "is_read": is_read,
-            "vote": vote_count,
-            "id_return": id_return if id_return is not None else None,
-            "edited": False
-        }
-        
-        message_json = json.dumps(message_data, ensure_ascii=False)
-        
+
+        # Створення екземпляра SocketModel
+        socket_message = schemas.SocketModel(
+            id=message_id,
+            created_at=current_time_utc,
+            receiver_id=receiver_id,  # Змінено на receiver_id
+            message=message,
+            fileUrl=file,
+            id_return=id_return,
+            user_name=user_name,
+            verified=verified,
+            avatar=avatar,
+            is_read=is_read,
+            vote=0,  # Припускаємо, що початкове голосування 0
+            edited=False
+        )
+
+        # Серіалізація даних моделі у JSON
+        message_json = socket_message.model_dump_json()
+
+        # Відправка повідомлення активним підключенням
+        sender_to_recipient = (sender_id, receiver_id)
+        recipient_to_sender = (receiver_id, sender_id)
+
         if sender_to_recipient in self.active_connections:
             await self.active_connections[sender_to_recipient].send_text(message_json)
 

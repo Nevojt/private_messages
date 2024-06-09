@@ -9,12 +9,12 @@ from datetime import datetime
     
         
 class SocketModel(BaseModel):
+    id: int
     created_at: datetime
     receiver_id: int
     message: Optional[str] = None
     fileUrl: Optional[str] = None
     id_return: Optional[int] = None
-    id: int
     user_name: str
     verified: bool
     avatar: str
