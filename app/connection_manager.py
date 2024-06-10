@@ -47,7 +47,7 @@ class ConnectionManagerPrivate:
         socket_message = schemas.SocketModel(
             created_at=current_time_utc,
             id=message_id,
-            sender_id=receiver_id,
+            receiver_id=sender_id,
             message=message,
             fileUrl=file,
             id_return=id_return,
