@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import List, Optional
 from sqlalchemy import and_, asc, or_, update, func
 from app import models, schemas
 from app.config import settings
@@ -22,13 +22,18 @@ def is_base64(s):
     except Exception:
         return False
 
-async def async_encrypt(data: str):
+async def async_encrypt(data: Optional[str]):
+    if data is None:
+        return None
     
     encrypted = cipher.encrypt(data.encode())
     encoded_string = base64.b64encode(encrypted).decode('utf-8')
     return encoded_string
 
-async def async_decrypt(encoded_data: str):
+async def async_decrypt(encoded_data: Optional[str]):
+    if encoded_data is None:
+        return None
+    
     if not is_base64(encoded_data):
         return encoded_data
 
@@ -82,7 +87,7 @@ async def fetch_last_private_messages(session: AsyncSession, sender_id: int, rec
     for private, user, votes in raw_messages:
         decrypted_message = await async_decrypt(private.message)
         if decrypted_message is None:
-            decrypted_message = "Decryption failed"
+            decrypted_message = None
 
         message_data = {
             "created_at": private.created_at,

@@ -43,7 +43,7 @@ class ConnectionManagerPrivate:
         current_time_utc = datetime.now(timezone).isoformat()
         message_id = await self.add_private_all_to_database(sender_id, receiver_id, message, file, id_return, is_read)
 
-        # Створення екземпляра SocketModel
+        # SocketModel
         socket_message = schemas.SocketModel(
             created_at=current_time_utc,
             id=message_id,
