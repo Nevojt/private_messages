@@ -77,7 +77,7 @@ async def web_private_endpoint(
                     messages.reverse()
     
                     for message in messages:  
-                        message_json = json.dumps(message, ensure_ascii=False)
+                        message_json = message.model_dump_json()
                         await websocket.send_text(message_json)
                                 
 
@@ -97,12 +97,12 @@ async def web_private_endpoint(
                     messages.reverse()
     
                     for message in messages:  
-                        message_json = json.dumps(message, ensure_ascii=False)
+                        message_json = message.model_dump_json()
                         await websocket.send_text(message_json)
                 
                                 
                 except Exception as e:
-                    logger.error(f"Error processing delete: {e}", exc_info=True)  # Запис помилки
+                    logger.error(f"Error processing delete: {e}", exc_info=True)
                     await websocket.send_json({"message": f"Error processing change: {e}"})
                     
             elif 'change_message' in data:
@@ -116,7 +116,7 @@ async def web_private_endpoint(
                     messages.reverse()
                         
                     for message in messages:  
-                        message_json = json.dumps(message, ensure_ascii=False)
+                        message_json =  message.model_dump_json()
                         await websocket.send_text(message_json)
                     
 
