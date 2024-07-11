@@ -33,8 +33,7 @@ class ConnectionManagerPrivate:
     async def send_private_all(self, message: Optional[str], file: Optional[str],
                                sender_id: int, receiver_id: int,
                                user_name: str, verified: bool,
-                               avatar: str, id_return: Optional[int],
-                               is_read: bool):
+                               avatar: str, id_return: Optional[int]):
         
         sender_to_recipient = (sender_id, receiver_id)
         recipient_to_sender = (receiver_id, sender_id)
@@ -42,6 +41,9 @@ class ConnectionManagerPrivate:
         timezone = pytz.timezone('UTC')
         current_time_utc = datetime.now(timezone).isoformat()
         message_id = await self.add_private_all_to_database(sender_id, receiver_id, message, file, id_return, is_read)
+        
+        is_recipient_connected = self.is_user_connected(receiver_id, sender_id)
+        is_read = not is_recipient_connected
 
         # SocketModel
         socket_message = schemas.SocketModel(

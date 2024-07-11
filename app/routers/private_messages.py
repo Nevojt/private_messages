@@ -130,8 +130,6 @@ async def web_private_endpoint(
                 original_message_id = message_data['original_message_id']
                 original_message = message_data['message']
                 file_url = message_data['fileUrl']
-                
-                is_recipient_active = manager.is_user_connected(receiver_id, user.id)
                     
                 await manager.send_private_all(
                                     message=original_message,
@@ -141,8 +139,7 @@ async def web_private_endpoint(
                                     user_name=user.user_name,
                                     avatar=user.avatar,
                                     verified=user.verified,
-                                    id_return=original_message_id,
-                                    is_read=True     # not is_recipient_active
+                                    id_return=original_message_id
                                     )
                                             
     except WebSocketDisconnect:
