@@ -33,7 +33,8 @@ class ConnectionManagerPrivate:
     async def send_private_all(self, message: Optional[str], file: Optional[str],
                                sender_id: int, receiver_id: int,
                                user_name: str, verified: bool,
-                               avatar: str, id_return: Optional[int]):
+                               avatar: str, id_return: Optional[int],
+                               is_read: bool):
         
         sender_to_recipient = (sender_id, receiver_id)
         recipient_to_sender = (receiver_id, sender_id)
