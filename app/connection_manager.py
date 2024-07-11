@@ -42,6 +42,9 @@ class ConnectionManagerPrivate:
         timezone = pytz.timezone('UTC')
         current_time_utc = datetime.now(timezone).isoformat()
         message_id = await self.add_private_all_to_database(sender_id, receiver_id, message, file, id_return, is_read)
+        
+        is_recipient_connected = self.is_user_connected(receiver_id, sender_id)
+        is_read = not is_recipient_connected
 
         # SocketModel
         socket_message = schemas.SocketModel(
