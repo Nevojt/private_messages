@@ -133,6 +133,9 @@ async def web_private_endpoint(
                 
                 is_recipient_active = await manager.is_user_connected(receiver_id, user.id)
                 
+                if is_recipient_active:
+                    is_recipient_active = False
+                    
                 await manager.send_private_all(
                                     message=original_message,
                                     file=file_url,
