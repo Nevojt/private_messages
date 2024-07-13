@@ -140,8 +140,9 @@ async def web_private_endpoint(
                                     avatar=user.avatar,
                                     verified=user.verified,
                                     id_return=original_message_id,
-                                    is_read=True     # not is_recipient_active
+                                    is_read=True
                                     )
+                await mark_messages_as_read(session, user.id, receiver_id)
                                             
     except WebSocketDisconnect:
         await manager.disconnect(user.id, receiver_id)

@@ -72,11 +72,6 @@ class ConnectionManagerPrivate:
         if recipient_to_sender in self.active_connections:
             await self.active_connections[recipient_to_sender].send_text(message_json)
         
-    def is_user_connected(self, user_id: int, recipient_id: int) -> bool:
-        """
-        Check if a user is connected to the recipient.
-        """
-        return (user_id, recipient_id) in self.active_connections or (recipient_id, user_id) in self.active_connections
 
     @staticmethod
     async def add_private_all_to_database(sender_id: int, receiver_id: int,
