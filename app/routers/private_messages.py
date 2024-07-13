@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
@@ -62,6 +63,13 @@ async def web_private_endpoint(
     for message in messages:  
         message_json = message.json()
         await websocket.send_text(message_json)
+    
+    async def periodic_task():
+        while True:
+            await mark_messages_as_read(session, user.id, receiver_id)
+            await asyncio.sleep(1)  # чекає 1 секунду
+    
+    task = asyncio.create_task(periodic_task())
 
     try:
         while True:
@@ -145,6 +153,7 @@ async def web_private_endpoint(
                 await mark_messages_as_read(session, user.id, receiver_id)
                                             
     except WebSocketDisconnect:
+        task.cancel()
         await manager.disconnect(user.id, receiver_id)
     finally:
         await session.close()
