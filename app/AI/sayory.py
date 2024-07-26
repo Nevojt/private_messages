@@ -23,7 +23,7 @@ async def ask_to_gpt(ask_to_chat: str) -> str:
             ],
             model="gpt-4o-mini",
             temperature=0.9,
-            max_tokens=100,
+            max_tokens=200,
             top_p=1,
             frequency_penalty=0.0,
             presence_penalty=0.0,
