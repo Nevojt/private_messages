@@ -134,43 +134,50 @@ async def web_private_endpoint(
 
                 
             elif 'send' in data:
-                if receiver_id != 2:
-                    message_data = data['send']
-                    original_message_id = message_data['original_message_id']
-                    original_message = message_data['message']
-                    file_url = message_data['fileUrl']
-                        
-                    await manager.send_private_all(
-                                        message=original_message,
-                                        file=file_url,
-                                        receiver_id=receiver_id,
-                                        sender_id=user.id,
-                                        user_name=user.user_name,
-                                        avatar=user.avatar,
-                                        verified=user.verified,
-                                        id_return=original_message_id,
-                                        is_read=True
-                                        )
-                    await mark_messages_as_read(session, user.id, receiver_id)
-                else:
+                
+                message_data = data['send']
+                original_message_id = message_data['original_message_id']
+                original_message = message_data['message']
+                file_url = message_data['fileUrl']
                     
-                    message_data = data['send']
-                    original_message_id = message_data['original_message_id']
-                    original_message = message_data['message']
-                    file_url = message_data['fileUrl']
-                        
-                    response_sayory = await sayory.ask_to_gpt(original_message)
+                try:
+                    # Відправка повідомлення користувача, незалежно від ID одержувача
                     await manager.send_private_all(
-                                        message=response_sayory,
-                                        file=file_url,
-                                        receiver_id=receiver_id,
-                                        sender_id=user.id,
-                                        user_name=user.user_name,
-                                        avatar=user.avatar,
-                                        verified=user.verified,
-                                        id_return=original_message_id,
-                                        is_read=True
-                                        )
+                        message=original_message,
+                        file=file_url,
+                        receiver_id=receiver_id,
+                        sender_id=user.id,
+                        user_name=user.user_name,
+                        avatar=user.avatar,
+                        verified=user.verified,
+                        id_return=original_message_id,
+                        is_read=True
+                    )
+                    await mark_messages_as_read(session, user.id, receiver_id)
+                    logger.info(f"Sent message: {original_message}")
+                except Exception as e:
+                    logger.error(f"Error sending message: {e}", exc_info=True)
+                    await websocket.send_json({"message": f"Error sending message: {e}"})
+
+                if receiver_id == 2:
+                    try:
+                        response_sayory = await sayory.ask_to_gpt(original_message)
+                        await manager.send_private_all(
+                            message=response_sayory,
+                            file=file_url,
+                            receiver_id=user.id,
+                            sender_id=receiver_id,
+                            user_name=user.user_name,
+                            avatar=user.avatar,
+                            verified=user.verified,
+                            id_return=original_message_id,
+                            is_read=True
+                        )
+                        await mark_messages_as_read(session, user.id, receiver_id)
+                        logger.info(f"Sent GPT response: {response_sayory}")
+                    except Exception as e:
+                        logger.error(f"Error processing GPT query: {e}", exc_info=True)
+                        await websocket.send_json({"message": f"Error processing GPT query: {e}"})
                         
                 
                                             
