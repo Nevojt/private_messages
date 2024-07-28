@@ -167,9 +167,9 @@ async def web_private_endpoint(
                             file=file_url,
                             receiver_id=user.id,
                             sender_id=receiver_id,
-                            user_name=user.user_name,
-                            avatar=user.avatar,
-                            verified=user.verified,
+                            user_name=receiver_id.user_name,
+                            avatar=receiver_id.avatar,
+                            verified=receiver_id.verified,
                             id_return=original_message_id,
                             is_read=True
                         )
