@@ -2,10 +2,6 @@
 from openai import AsyncOpenAI
 from app.config import settings
 
-from fastapi import FastAPI, HTTPException
-
-app = FastAPI()
-
 sayori_key=settings.openai_api_key
 
 client = AsyncOpenAI(
