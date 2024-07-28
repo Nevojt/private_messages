@@ -167,9 +167,9 @@ async def web_private_endpoint(
                             file=file_url,
                             receiver_id=user.id,
                             sender_id=receiver_id,
-                            user_name=receiver_id.user_name,
-                            avatar=receiver_id.avatar,
-                            verified=receiver_id.verified,
+                            user_name="SayOry",
+                            avatar="https://tygjaceleczftbswxxei.supabase.co/storage/v1/object/public/image_bucket/inne/image/girl_5.webp",
+                            verified=True,
                             id_return=original_message_id,
                             is_read=True
                         )
