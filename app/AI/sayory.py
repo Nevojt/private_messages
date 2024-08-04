@@ -10,14 +10,14 @@ client = AsyncOpenAI(
 )
 
 instruction = "Ти асистент в менеджері і твоє ім'я saory далі буде повідомлення від користувача:  "
-
+instruction_2 = " Твоя відповідь не повинна перевищувати 600 символів."
 async def ask_to_gpt(ask_to_chat: str) -> str:
     try:
         chat_completion = await client.chat.completions.create(
             messages=[
                 {
                     "role": "user",
-                    "content": instruction + ask_to_chat,
+                    "content": instruction + ask_to_chat + instruction_2,
                 }
             ],
             model="gpt-4o-mini",
