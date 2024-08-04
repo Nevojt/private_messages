@@ -162,17 +162,20 @@ async def web_private_endpoint(
                 if receiver_id == 2:
                     try:
                         response_sayory = await sayory.ask_to_gpt(original_message)
-                        await manager.send_private_all(
-                            message=response_sayory,
-                            file=file_url,
-                            receiver_id=user.id,
-                            sender_id=receiver_id,
-                            user_name="SayOry",
-                            avatar="https://tygjaceleczftbswxxei.supabase.co/storage/v1/object/public/image_bucket/inne/image/girl_5.webp",
-                            verified=True,
-                            id_return=original_message_id,
-                            is_read=True
-                        )
+                        
+                        for message in response_sayory:
+                            await manager.send_private_all(
+                                message=message,
+                                file=file_url,
+                                receiver_id=user.id,
+                                sender_id=receiver_id,
+                                user_name="SayOry",
+                                avatar="https://tygjaceleczftbswxxei.supabase.co/storage/v1/object/public/image_bucket/inne/image/girl_5.webp",
+                                verified=True,
+                                id_return=original_message_id,
+                                is_read=True
+                            )
+                            await asyncio.sleep(1)
                         await mark_messages_as_read(session, user.id, receiver_id)
                         logger.info(f"Sent GPT response: {response_sayory}")
                     except Exception as e:
